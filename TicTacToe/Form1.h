@@ -1,4 +1,5 @@
 #pragma once
+#include "gameField.h"
 
 namespace TicTacToe {
 
@@ -43,7 +44,9 @@ namespace TicTacToe {
 
 	private:
 		gameField game;
-		/// <summary>
+	private: System::Windows::Forms::PictureBox^  pictureBox1;
+
+			 /// <summary>
 		/// Required designer variable.
 		/// </summary>
 		System::ComponentModel::Container ^components;
@@ -60,7 +63,9 @@ namespace TicTacToe {
 			this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->button2 = (gcnew System::Windows::Forms::Button());
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
+			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -75,11 +80,13 @@ namespace TicTacToe {
 			// 
 			// numericUpDown1
 			// 
+			this->numericUpDown1->Enabled = false;
 			this->numericUpDown1->Location = System::Drawing::Point(88, 15);
 			this->numericUpDown1->Name = L"numericUpDown1";
+			this->numericUpDown1->ReadOnly = true;
 			this->numericUpDown1->Size = System::Drawing::Size(73, 20);
 			this->numericUpDown1->TabIndex = 1;
-			this->numericUpDown1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {3, 0, 0, 0});
+			this->numericUpDown1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 3, 0, 0, 0 });
 			// 
 			// checkBox1
 			// 
@@ -109,11 +116,22 @@ namespace TicTacToe {
 			this->button2->Text = L"Start";
 			this->button2->UseVisualStyleBackColor = true;
 			// 
+			// pictureBox1
+			// 
+			this->pictureBox1->BackColor = System::Drawing::Color::White;
+			this->pictureBox1->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->pictureBox1->Location = System::Drawing::Point(313, 17);
+			this->pictureBox1->Name = L"pictureBox1";
+			this->pictureBox1->Size = System::Drawing::Size(39, 36);
+			this->pictureBox1->TabIndex = 5;
+			this->pictureBox1->TabStop = false;
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(308, 262);
+			this->ClientSize = System::Drawing::Size(375, 262);
+			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->checkBox1);
@@ -121,16 +139,97 @@ namespace TicTacToe {
 			this->Controls->Add(this->button1);
 			this->Name = L"Form1";
 			this->Text = L"Form1";
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
-				 game.init(numericUpDown1.Value);
-
+	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e)
+		{
+			int a = (int)numericUpDown1->Value;
+			game.init(a, a);
+			for (int y = 0; y < a; y++)
+				for (int x = 0; x < a; x++)
+				{
+					System::Windows::Forms::PictureBox^  pic;
+					pic = gcnew System::Windows::Forms::PictureBox();
+					pic->BackColor = System::Drawing::Color::White;
+					pic->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+					pic->Location = System::Drawing::Point(15 + 60 * x, 80 + 60 * y);
+					pic->Name = L"";
+					pic->Size = System::Drawing::Size(50, 50);
+					pic->TabIndex = 500 + 10*x + y;
+					pic->TabStop = false;
+					pic->Click += gcnew System::EventHandler(this, &Form1::pic_Click);
+					this->Controls->Add(pic);
+					
+				}
+		}
+			 void tabIndexToXY(int tabIndex, int *x, int *y)
+			 {
+				 if (tabIndex < 500)
+				 {
+					 *x = -1;
+					 *y = -1;
+				 }
+				 else
+				 {
+					 *x = (tabIndex - 500) / 10;
+					 *y = (tabIndex - 500) % 10;
+				 }
 			 }
+	private: System::Void pic_Click(System::Object^  sender, System::EventArgs^  e)
+		{
+			System::Windows::Forms::PictureBox^  pic = (System::Windows::Forms::PictureBox^)sender;
+			int x;
+			int y;
+			tabIndexToXY(pic->TabIndex, &x, &y);
+
+			cellValue_t res = game.setCellAs(x, y, cv_X);
+			switch (res)
+			{
+			case cv_X:
+			case cv_O:
+				game.doNextStep(x, y);
+				break;
+			case cv_none:
+			case cv_err:
+				break;
+			}
+
+			// redraw all cells
+			this->Controls->Count;
+			for each(Control ^pC in this->Controls)
+			{
+				if (pC->GetType() == System::Windows::Forms::PictureBox::typeid)
+				{
+					//System::Windows::Forms::PictureBox ^pic = (System::Windows::Forms::PictureBox) pC;
+					int x;
+					int y;
+					tabIndexToXY(pC->TabIndex, &x, &y);
+					if (0 <= x && 0 <= y)
+					{
+						System::Drawing::Color color = System::Drawing::Color::DarkGray;
+						cellValue_t cv = game.getValueFrom(x, y);
+						switch (cv)
+						{
+						case cv_X:
+							color = System::Drawing::Color::Red;
+							break;
+						case cv_O:
+							color = System::Drawing::Color::Blue;
+							break;
+						case cv_none:
+							color = System::Drawing::Color::White;
+							break;
+						}
+						pC->BackColor = color;
+					}
+				}
+			}
+		}
 };
 }
 

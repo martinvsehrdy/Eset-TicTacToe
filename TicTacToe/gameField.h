@@ -1,6 +1,6 @@
 #pragma once
 #include <list>
-#include <functional>
+#include <map>
 
 using namespace std;
 
@@ -27,7 +27,7 @@ public:
 	 */
 	void init(int sizeX, int sizeY);
 
-	cellValue_t getValueFrom(int, x, int y);
+	cellValue_t getValueFrom(int x, int y);
 
 	/* sets cell on coordinate x,y as value and return its value
 	 * in case of x,y is out of field returns cv_err
@@ -49,7 +49,7 @@ private:
 	int sizeX;	// vertical number of cells
 	int sizeY;	// horizontal number of cells
 	cellValue_t *field;	// cell[x,y] coresponds with field[x+y*sizeX]
-	hash<int> emptyCells;
+	map<int, bool> *emptyCells;
 
 	/* convert coordinate X,Y to index of field, index = x+y*sizeX
 	 */
