@@ -6,19 +6,26 @@ using namespace std;
 
 enum cellValue_t
 {
-	cv_none,	// empty cell
-	cv_X,		// cell with X
-	cv_O,		// cell with O
-	cv_err		// undefined cell
+	cv_none = 0,	// empty cell
+	cv_X = 1,		// cell with X
+	cv_O = 2,		// cell with O
+	cv_err = 3		// undefined cell
+};
+const char cv_text[] = {' ', 'X', 'O', 'e'};
+struct Coord
+{
+	int x;
+	int y;
 };
 
-ref class gameField
+class gameField
 {
 public:
 	/* Sets game field empty, ie. no cells
 	 * 
 	 */
 	gameField(void);
+	gameField(int x, int y);
 
 	~gameField(void);
 
@@ -34,10 +41,7 @@ public:
 	 */
 	cellValue_t setCellAs(int x, int y, cellValue_t value);
 
-	/* choses empty cell and marks it by its cellValue
-	 */
-	void doNextStep(int &x, int &y);
-
+	Coord getCoord();
 	/* returns sign of winner
 	 *   cv_none - game is still going on
 	 *   cv_X - player with X won
@@ -45,14 +49,16 @@ public:
 	 */
 	cellValue_t whoHasWon();
 
+	/* returns number of empty cells */
+	int numEmptyCells();
+
+	void printField();
+
 private:
 	int sizeX;	// vertical number of cells
 	int sizeY;	// horizontal number of cells
-	cellValue_t *field;	// cell[x,y] coresponds with field[x+y*sizeX]
-	map<int, bool> *emptyCells;
+	cellValue_t **field;	// cell[x][y]
 
-	/* convert coordinate X,Y to index of field, index = x+y*sizeX
-	 */
-	int convertXYToIndex(int x, int y);
+	int numCellsWith(cellValue_t val);
 };
 
